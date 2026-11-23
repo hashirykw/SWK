@@ -7,7 +7,12 @@
 <meta name="description" content="SWK Solutions assistant. Free O & A Level Maths demo lecture by Sir Waqas Khan, admissions, fees, campuses, and a direct line to Sir.">
 <meta name="theme-color" content="#070708">
 <link rel="icon" href="swk-crest-silver.png">
-<link rel="apple-touch-icon" href="swk-crest-silver.png">
+<link rel="apple-touch-icon" href="swk-icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="SWK">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&family=Cormorant+Garamond:ital,wght@1,500&display=swap" rel="stylesheet">
@@ -34,6 +39,26 @@ a{color:inherit}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:linear-gradient(var(--red-2),var(--red-deep));border-radius:6px}
 ::-webkit-scrollbar-thumb:hover{background:var(--red)}
+
+/* notification gate */
+.ng-top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.ng-ic{width:48px;height:48px;flex:none;border-radius:14px;display:grid;place-items:center;color:#fff;background:var(--red-grad);box-shadow:0 10px 22px -10px var(--red-glow),inset 0 1px 0 rgba(255,255,255,.3);animation:ring 2.6s var(--ease) infinite}
+.ng-ic svg{width:22px;height:22px}
+@keyframes ring{0%,70%,100%{transform:none}75%{transform:rotate(-12deg)}80%{transform:rotate(10deg)}85%{transform:rotate(-6deg)}90%{transform:rotate(3deg)}}
+.ng.ok .ng-ic{animation:none;background:var(--silver-soft);color:#0b0b0d}
+.ng .why{display:grid;gap:7px;margin:4px 0 14px;padding:0;list-style:none}
+.ng .why li{display:flex;gap:9px;align-items:flex-start;font-size:.82rem;color:var(--silver);line-height:1.45}
+.ng .why li svg{width:15px;height:15px;flex:none;margin-top:2px;color:var(--red-2)}
+.ng .locked{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;border:1px dashed var(--line-2);background:rgba(0,0,0,.35);margin-bottom:12px;font-size:.8rem;color:var(--muted)}
+.ng .locked svg{width:16px;height:16px;color:var(--silver-2);flex:none}
+.ng .locked b{color:#fff;font-weight:700}
+.ng ol{margin:2px 0 14px 18px;display:grid;gap:6px;font-size:.82rem;color:var(--silver);line-height:1.5}
+.ng ol b{color:#fff}
+.ng .alt{display:flex;gap:8px;margin-top:8px}
+.ng .alt .btn{flex:1;min-height:42px;font-size:.8rem}
+.btn-ghost{color:var(--text);background:rgba(255,255,255,.05);border:1px solid var(--line-2)}
+.btn-ghost:hover{border-color:var(--silver-2);background:rgba(255,255,255,.09)}
+.ng.shake{animation:shake .4s}
 
 /* stage: the reel look — black, grid, chalk formulas, red glow */
 .stage{position:fixed;inset:0;z-index:0;overflow:hidden;
@@ -291,6 +316,7 @@ const CONFIG = {
   SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5nY3NobHVwa3V1c2R1ZHdpbHhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU0NTk1ODYsImV4cCI6MjExMTAzNTU4Nn0.-jpNSTrObtYl_IzrcTp3V46Lmk1tL61-ye2IURtsqPA',
   WHATSAPP: '923342222792',
   ADMIN_NAME: 'Sir Waqas Khan',
+  VAPID_PUBLIC: 'BMF9Qerl1pTuFBcVt3KdRRnSuhM5OO0AurWAVMmT9J_2h58E2ZayPxhb5G9-X1cCWJuDHiCn8rP9ujb74fTe-g4',
   FALLBACK_LECTURE: { title:'O / A Level Maths — Demo Lecture', teacher:'Sir Waqas Khan', level:'Any', subject:'Mathematics',
                       url:'https://zoom.us/clips/share/piVHafNVQJejRavJun0I-g', passcode:'Swk@1273' }
 };
@@ -323,7 +349,9 @@ const I = {
   arrow:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h13M13 6l6 6-6 6"/></svg>',
   lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>',
   alert:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5v.5"/></svg>',
-  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  bellOn:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/><path d="M3 7.5A9 9 0 0 1 5.5 3.5M21 7.5a9 9 0 0 0-2.5-4"/></svg>',
+  share:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>'
 };
 
 /* ════════════════ SOUND (synthesised, no files) ════════════════ */
@@ -437,6 +465,100 @@ function toast(msg, type) {
   if (type === 'err') SFX.error();
 }
 
+/* ════════════════ PUSH NOTIFICATIONS ════════════════ */
+const UA = navigator.userAgent;
+const ENV = {
+  ios: /iPhone|iPad|iPod/i.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1),
+  inApp: /Instagram|FBAN|FBAV|FB_IAB|Line\/|Snapchat|TikTok|; wv\)/i.test(UA),
+  standalone: matchMedia('(display-mode: standalone)').matches || navigator.standalone === true
+};
+const PUSH = {
+  reg: null,
+  supported() { return !ENV.inApp && 'Notification' in window && 'serviceWorker' in navigator && 'PushManager' in window; },
+  granted() { return 'Notification' in window && Notification.permission === 'granted'; },
+  async register() {
+    if (!('serviceWorker' in navigator)) return null;
+    try { this.reg = await navigator.serviceWorker.register('sw.js'); } catch (e) { this.reg = null; }
+    return this.reg;
+  },
+  key() { const s = CONFIG.VAPID_PUBLIC.replace(/-/g,'+').replace(/_/g,'/'); const raw = atob(s + '='.repeat((4 - s.length % 4) % 4)); return Uint8Array.from(raw, c => c.charCodeAt(0)); },
+  async subscribe() {
+    const reg = this.reg || await this.register(); if (!reg || !S.token) return false;
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey:this.key() });
+    const j = sub.toJSON(); j.url = location.href.split('#')[0].split('?')[0];
+    await rpc('swk_save_push', { p_token:S.token, p_sub:j });
+    S.pushOn = true; save(); return true;
+  },
+  async show(title, body) {
+    try { const reg = this.reg || await navigator.serviceWorker.getRegistration(); if (reg) { await reg.showNotification(title, { body, icon:'swk-icon-192.png', badge:'swk-badge.png', tag:'swk-local' }); return; } } catch(e) {}
+    try { new Notification(title, { body, icon:'swk-icon-192.png' }); } catch(e) {}
+  }
+};
+if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', e => { if (e.data && e.data.type === 'swk-push') sync(); });
+
+/* The lecture stays locked until notifications are allowed. Resolves once they are on
+   (or, on a browser that cannot show notifications at all, once the student has seen how to fix that). */
+function requireNotifications() {
+  return new Promise(resolve => {
+    if (PUSH.supported() && PUSH.granted()) { PUSH.subscribe().catch(()=>{}); return resolve(true); }
+    const card = el('<div class="xc-card ng" role="group" aria-label="Turn on notifications"></div>');
+    const lockedRow = `<div class="locked">${I.lock}<span><b>Demo lecture</b> · locked until notifications are on</span></div>`;
+    const done = async () => {
+      card.classList.add('ok');
+      card.innerHTML = `<div class="ng-top"><span class="ng-ic">${I.check}</span><div><h5>Notifications on</h5><div class="sub" style="margin:4px 0 0">Your lecture is unlocked.</div></div></div>`;
+      S.locked = false; save(); SFX.success(); resolve(true);
+    };
+    const enable = async btn => {
+      btn && btn.classList.add('loading'); btn && (btn.disabled = true);
+      let perm = 'default';
+      try { perm = await Notification.requestPermission(); } catch(e) { perm = Notification.permission; }
+      if (perm === 'granted') {
+        try { await PUSH.subscribe(); } catch(e) { toast('Notifications are on, but we couldn\'t register this device. We\'ll retry automatically.', 'err'); }
+        track('notify_granted'); return done();
+      }
+      btn && btn.classList.remove('loading'); btn && (btn.disabled = false);
+      if (perm === 'denied') { track('notify_denied'); return render('blocked'); }
+      card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
+      toast('Please tap Allow. The lecture unlocks as soon as notifications are on.', 'err');
+    };
+    const render = state => {
+      if (state === 'ask') {
+        card.innerHTML = `<div class="ng-top"><span class="ng-ic">${I.bellOn}</span><div><h5>Turn on notifications</h5><div class="sub" style="margin:4px 0 0">Required to unlock your demo lecture</div></div></div>
+          <ul class="why"><li>${I.check}<span>Sir Waqas Khan's replies reach you even when this page is closed</span></li>
+          <li>${I.check}<span>Batch timings, seat updates and the Early Bird deadline</span></li>
+          <li>${I.check}<span>No spam. Only messages from SWK about your lecture and admission</span></li></ul>
+          ${lockedRow}<button type="button" class="btn btn-red go" style="width:100%"><span class="spin"></span>${I.bellOn}<span class="bl">Allow notifications & unlock</span></button>`;
+        card.querySelector('.go').onclick = e => { SFX.tap(); enable(e.currentTarget); };
+      } else if (state === 'blocked') {
+        card.innerHTML = `<div class="ng-top"><span class="ng-ic">${I.alert}</span><div><h5>Notifications are blocked</h5><div class="sub" style="margin:4px 0 0">Your browser is blocking them for this site</div></div></div>
+          <ol><li>Tap the <b>lock icon</b> (or <b>ⓘ</b>) next to the web address at the top</li><li>Open <b>Permissions</b> or <b>Site settings</b> and set <b>Notifications</b> to <b>Allow</b></li><li>Come back here and tap <b>I've turned them on</b></li></ol>
+          ${lockedRow}<button type="button" class="btn btn-red go" style="width:100%"><span class="spin"></span><span class="bl">I've turned them on</span></button>
+          <div class="alt"><button type="button" class="btn btn-ghost rl">Reload page</button></div>`;
+        card.querySelector('.go').onclick = async e => { SFX.tap(); if (Notification.permission === 'granted') { const b = e.currentTarget; b.classList.add('loading'); try { await PUSH.subscribe(); } catch(_) {} return done(); }
+          if (Notification.permission === 'default') return enable(e.currentTarget);
+          card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake'); toast('Still blocked. Allow notifications in site settings, then try again.', 'err'); };
+        card.querySelector('.rl').onclick = () => location.reload();
+      } else {
+        const link = location.href.split('#')[0];
+        const how = ENV.inApp
+          ? `<ol><li>Tap the <b>⋯</b> menu at the top of this screen</li><li>Choose <b>Open in browser</b> (Chrome or Safari)</li><li>Your form is saved, so the lecture unlocks there in one tap</li></ol>`
+          : ENV.ios
+          ? `<ol><li>Tap the <b>Share</b> button ${I.share.replace('<svg','<svg style="width:14px;height:14px;vertical-align:-2px"')} in Safari</li><li>Choose <b>Add to Home Screen</b>, then open <b>SWK</b> from your Home Screen</li><li>Tap <b>Allow</b> when asked, and the lecture unlocks</li></ol>`
+          : `<ol><li>Open this page in <b>Chrome</b>, <b>Edge</b>, <b>Firefox</b> or <b>Safari</b></li><li>Tap <b>Allow</b> when asked, and the lecture unlocks</li></ol>`;
+        card.innerHTML = `<div class="ng-top"><span class="ng-ic">${I.bellOn}</span><div><h5>Notifications needed</h5><div class="sub" style="margin:4px 0 0">${ENV.inApp ? 'This in-app browser can\'t show notifications' : 'This browser can\'t show notifications here'}</div></div></div>
+          ${how}${lockedRow}<button type="button" class="btn btn-red cp" style="width:100%">Copy link to this page</button>
+          <div class="alt"><button type="button" class="btn btn-ghost skip">Continue without notifications</button></div>`;
+        card.querySelector('.cp').onclick = async () => { try { await navigator.clipboard.writeText(link); toast('Link copied'); } catch(e) { toast('Copy failed. Link: ' + link, 'err'); } };
+        card.querySelector('.skip').onclick = () => { track('notify_unsupported_skip', { inApp:ENV.inApp, ios:ENV.ios }); card.remove(); S.locked = false; save(); resolve(false); };
+      }
+    };
+    S.locked = true; save();
+    render(!PUSH.supported() ? 'unsupported' : Notification.permission === 'denied' ? 'blocked' : 'ask');
+    log.append(card); scroll();
+  });
+}
+
 /* ════════════════ MENU ════════════════ */
 const OPTIONS = [
   { id:'o_lecture', icon:I.play,   t:'O Level demo lecture', s:'Free · opens as soon as you send the form', cls:'hot' },
@@ -462,7 +584,9 @@ async function choose(id, label) {
   switch (id) {
     case 'o_lecture': case 'a_lecture': {
       const lvl = id === 'o_lecture' ? 'O Level' : 'A Level';
-      if (S.token && S.lecture) { await say(`Welcome back${S.name ? ', **' + first(S.name) + '**' : ''}. Here's your demo lecture again.`); push({ k:'lecture', lec:S.lecture }); followUpActs(); return; }
+      if (S.token && S.lecture) {
+        if (PUSH.supported() && !PUSH.granted()) { await say('Turn on notifications to open your demo lecture.'); await requireNotifications(); }
+        await say(`Welcome back${S.name ? ', **' + first(S.name) + '**' : ''}. Here's your demo lecture again.`); push({ k:'lecture', lec:S.lecture }); followUpActs(); return; }
       await say(`Fill in this short form and your **${lvl} demo lecture by Sir Waqas Khan** opens straight away.`);
       showForm({ intent:'lecture', level:lvl, title:'Unlock your demo lecture', sub:'About 20 seconds. Only SWK sees your details.', cta:'Unlock my lecture' });
       break;
@@ -589,9 +713,7 @@ function showForm(o) {
 async function afterForm(o, data) {
   const fn = first(data.name);
   if (o.intent === 'lecture') {
-    await say(`Thank you, **${fn}**. Your demo lecture is unlocked.`, 600);
-    push({ k:'lecture', lec:S.lecture || CONFIG.FALLBACK_LECTURE });
-    await say('Tap **Watch demo lecture**. The passcode is copied for you, so just paste it if Zoom asks.', 800);
+    await unlockLecture(fn);
   } else if (o.intent === 'talk' || o.intent === 'question') {
     mode = 'live';
     if (!S.pending) await say(`Thanks, **${fn}**. You're connected to **Sir Waqas Khan's desk**. Type your message below.`, 600);
@@ -601,10 +723,23 @@ async function afterForm(o, data) {
     acts(['Yes, show me','Maybe later'], q => q === 'Yes, show me' ? deliverLecture() : followUpActs());
   }
   if (S.pending) { const q = S.pending; S.pending = null; save(); await sendToSir(q); }
-  await offerNotifications();
+  if (o.intent !== 'lecture') await offerNotifications();
   if (o.intent === 'lecture') followUpActs();
 }
-function deliverLecture() { if (!S.lecture) return choose('o_lecture','O Level demo lecture'); push({ k:'lecture', lec:S.lecture }); SFX.recv(); followUpActs(); }
+async function unlockLecture(fn) {
+  if (!PUSH.granted()) await say(`Thank you${fn ? ', **' + fn + '**' : ''}. One last step: turn on notifications and your demo lecture unlocks straight away.`, 600);
+  const on = await requireNotifications();
+  const lec = S.lecture || CONFIG.FALLBACK_LECTURE;
+  await say(on ? `You're all set${fn ? ', **' + fn + '**' : ''}. Your demo lecture is unlocked.` : 'Your demo lecture is unlocked.', 500);
+  push({ k:'lecture', lec });
+  if (on) PUSH.show('Your demo lecture is unlocked', `${lec.title}${lec.passcode ? ' · Passcode ' + lec.passcode : ''}`);
+  await say('Tap **Watch demo lecture**. The passcode is copied for you, so just paste it if Zoom asks.' + (on ? ' Sir\'s replies and batch updates will now reach you as notifications.' : ''), 800);
+}
+async function deliverLecture() {
+  if (!S.lecture) return choose('o_lecture','O Level demo lecture');
+  if (PUSH.supported() && !PUSH.granted()) { await requireNotifications(); }
+  push({ k:'lecture', lec:S.lecture }); SFX.recv(); followUpActs();
+}
 
 /* ════════════════ LECTURE CARD ════════════════ */
 function lectureNode(lec) {
@@ -770,17 +905,17 @@ async function sync() {
     } else if (r && r.ok === false) { S.token = null; save(); }
   } catch (e) {} finally { syncing = false; }
 }
-function systemNotify(who, text) {
-  if (!('Notification' in window) || Notification.permission !== 'granted') return;
-  try { const n = new Notification(who, { body:text, icon:'swk-crest-silver.png', tag:'swk-chat' }); n.onclick = () => { window.focus(); n.close(); }; } catch(e) {}
-}
+function systemNotify(who, text) { if (PUSH.granted()) PUSH.show(who, text); }
 async function offerNotifications() {
-  if (!('Notification' in window) || Notification.permission !== 'default' || S.askedNotify) return;
+  if (!PUSH.supported()) return;
+  if (PUSH.granted()) { PUSH.subscribe().catch(()=>{}); return; }
+  if (Notification.permission !== 'default' || S.askedNotify) return;
   S.askedNotify = true; save();
-  await say('Would you like a notification when Sir replies or follows up with you?', 650);
+  await say('Would you like a notification when Sir replies, even when this page is closed?', 650);
   acts(['Yes, notify me','Not now'], async q => {
     if (q !== 'Yes, notify me') return;
     const p = await Notification.requestPermission();
+    if (p === 'granted') { try { await PUSH.subscribe(); } catch(e) {} }
     await say(p === 'granted' ? 'Notifications are on.' : 'No problem. Replies will still appear here with a chime.', 400);
   });
 }
@@ -792,6 +927,8 @@ body.addEventListener('scroll', () => { if (nearBottom()) $('#newpill').classLis
 function setWa() { $('#waLink').href = `https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent('Assalam-o-Alaikum, ' + (S.name ? 'this is ' + S.name + '. ' : '') + 'I have a question for SWK Solutions.')}`; }
 async function boot() {
   setWa();
+  await PUSH.register();
+  if (S.token && PUSH.supported() && PUSH.granted() && !sessionStorage.getItem('swk_sub')) { sessionStorage.setItem('swk_sub','1'); PUSH.subscribe().catch(()=>{}); }
   if (S.token && !S.log.length) {
     try { const h = await rpc('swk_history', { p_token:S.token });
       if (h && h.ok) { S.lecture = h.lecture || S.lecture; S.name = h.name;
@@ -811,6 +948,7 @@ async function boot() {
     scroll();
   }
   await sync();
+  if (S.token && S.locked) { await unlockLecture(first(S.name)); followUpActs(); }
   if (!sessionStorage.getItem('swk_opened')) { sessionStorage.setItem('swk_opened','1'); track('chat_opened'); }
 }
 const autosize = () => { input.style.height = 'auto'; input.style.height = Math.min(120, input.scrollHeight) + 'px'; sendBtn.disabled = !input.value.trim(); };

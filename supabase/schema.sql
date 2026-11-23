@@ -676,3 +676,24 @@ select * from (values
    '["Yes, call me","WhatsApp me","Not now"]'::jsonb)
 ) v(step, delay_hours, title, body, quick_replies)
 where not exists (select 1 from public.swk_followup_templates);
+
+-- ═══ WEB PUSH (follow-ups + Sir's replies as phone/desktop notifications) ═══
+-- Keys live in swk_settings('push') = {public, private, secret, subject}; set them directly in SQL, never in the repo.
+-- Edge function: supabase/functions/swk-push (verify_jwt off, checks x-cron-secret).
+create extension if not exists pg_net with schema extensions;
+create extension if not exists pg_cron;
+alter table public.swk_followups add column if not exists pushed_at timestamptz;
+alter table public.swk_messages add column if not exists pushed_at timestamptz;
+create table if not exists public.swk_push_subs (
+  id bigserial primary key, lead_id uuid not null references public.swk_leads(id) on delete cascade,
+  endpoint text not null unique, p256dh text not null, auth text not null, url text,
+  dead boolean not null default false, created_at timestamptz not null default now(), updated_at timestamptz not null default now());
+alter table public.swk_push_subs enable row level security;
+-- functions: swk_save_push(token, sub) [anon]; swk_push_pending(), swk_push_queue(),
+-- swk_push_mark(followups[], messages[], dead_endpoints[]), swk_push_config() [service_role only];
+-- swk_admin_push_stats(pass) [anon, passcode-gated]. Full bodies as applied in migration "swk_web_push".
+-- Cron (every minute, only fires when something is waiting):
+-- select cron.schedule('swk-push','* * * * *', $$ select net.http_post(
+--   url := 'https://<project>.supabase.co/functions/v1/swk-push',
+--   headers := jsonb_build_object('Content-Type','application/json','x-cron-secret',(select value->>'secret' from public.swk_settings where key='push')),
+--   body := '{}'::jsonb, timeout_milliseconds := 20000) where public.swk_push_pending(); $$);

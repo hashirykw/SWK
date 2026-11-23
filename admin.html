@@ -333,7 +333,7 @@ label.f>span{font-family:var(--mono);font-size:.58rem;letter-spacing:.16em;text-
 
     <!-- FOLLOW-UPS -->
     <section class="view" id="v-follow"><div class="pad">
-      <div class="h2"><div><h2 class="disp silver-t">Follow-ups</h2><p>Follow-ups reach students in the chat when they come back. If someone hasn't been back, send it on WhatsApp in one tap.</p></div></div>
+      <div class="h2"><div><h2 class="disp silver-t">Follow-ups</h2><p>Follow-ups go out as a notification at the due time and also wait in the student's chat. If someone has notifications off or hasn't replied, send it on WhatsApp in one tap.</p></div></div>
       <div class="panel" id="fuPanel"></div>
     </div></section>
 
@@ -524,7 +524,7 @@ async function openThread(id, silent) {
   ta.oninput = () => grow(ta);
   ta.onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); R.requestSubmit(); } };
   R.onsubmit = async e => { e.preventDefault(); const v = ta.value.trim(); if (!v) return; const b = R.querySelector('.btn'); b.classList.add('loading'); b.disabled = true;
-    try { await A('swk_admin_reply', { p_lead:l.id, p_body:v }); ta.value = ''; SFX.send(); toast('Sent. It appears in their chat.'); openThread(l.id, true); loadLeads(true); }
+    try { await A('swk_admin_reply', { p_lead:l.id, p_body:v }); ta.value = ''; SFX.send(); toast(l.push ? 'Sent. They\'ll get a notification within a minute.' : 'Sent. They\'ll see it next time they open the chat.'); openThread(l.id, true); loadLeads(true); }
     catch(err) { toast(err.message, 'err'); } finally { b.classList.remove('loading'); b.disabled = false; } };
   T.append(R);
   requestAnimationFrame(() => M.scrollTop = M.scrollHeight);
@@ -542,6 +542,7 @@ function renderSide(d) {
     <dt>Campus</dt><dd>${esc(l.campus || '—')}</dd><dt>Mode</dt><dd>${esc(l.mode || '—')}</dd><dt>School</dt><dd>${esc(l.school || '—')}</dd>
     <dt>Asked for</dt><dd>${esc(INTENT_LABEL[l.intent] || l.intent)}</dd><dt>Joining</dt><dd>${esc(l.join_when || '—')}</dd>
     <dt>Lecture</dt><dd>${l.lecture_opened_at ? 'Opened ' + l.lecture_opens + '×' : 'Not opened'}</dd>
+    <dt>Notifications</dt><dd>${l.push ? '<span class="st interested">On</span>' : '<span class="st">Off</span>'}</dd>
     <dt>First seen</dt><dd>${dt(l.created_at)}</dd><dt>Last seen</dt><dd>${ago(l.last_seen_at)} ago</dd></dl></div>`));
   const st = el(`<div><h4>Status</h4><select class="sel">${STATUSES.map(([v, t]) => `<option value="${v}" ${v === l.status ? 'selected' : ''}>${t}</option>`).join('')}</select></div>`);
   st.querySelector('select').onchange = async e => { try { await A('swk_admin_update_lead', { p_lead:l.id, p:{ status:e.target.value } }); toast('Status updated'); loadLeads(true); } catch(err) { toast(err.message, 'err'); } };
@@ -552,7 +553,7 @@ function renderSide(d) {
   const fu = el('<div><h4>Follow-ups</h4><div class="fl"></div></div>'), FL = fu.querySelector('.fl');
   if (!d.followups.length) FL.append(el('<div class="mono" style="padding:4px 0 8px">None scheduled</div>'));
   d.followups.forEach(f => {
-    const state = f.cancelled ? 'Cancelled' : f.responded_at ? 'Replied: ' + (f.response || '') : f.delivered_at ? 'Seen in chat ' + ago(f.delivered_at) + ' ago' : (new Date(f.due_at) <= new Date() ? 'Due now · waiting for them to return' : 'Due ' + ago(f.due_at));
+    const state = (f.pushed_at && !f.responded_at && !f.cancelled ? 'Notified · ' : '') + (f.cancelled ? 'Cancelled' : f.responded_at ? 'Replied: ' + (f.response || '') : f.delivered_at ? 'Seen in chat ' + ago(f.delivered_at) + ' ago' : (new Date(f.due_at) <= new Date() ? 'Due now · waiting for them to return' : 'Due ' + ago(f.due_at)));
     const x = el(`<div class="fu-i ${f.cancelled || f.responded_at ? 'done' : ''} ${!f.delivered_at && !f.cancelled && new Date(f.due_at) <= new Date() ? 'due' : ''}"><b>${esc(f.title)}</b>${esc(f.body)}<div class="s"><span>${esc(state)}</span>
       ${!f.cancelled && !f.responded_at ? `<span class="row-btns"><a class="btn btn-ghost btn-sm" href="${wa(l.phone, f.body)}" target="_blank" rel="noopener">${I.wa}</a>${!f.delivered_at ? '<button class="btn btn-ghost btn-sm cx">Cancel</button>' : ''}</span>` : ''}</div></div>`);
     const cx = x.querySelector('.cx'); if (cx) cx.onclick = async () => { try { await A('swk_admin_cancel_followup', { p_id:f.id }); toast('Follow-up cancelled'); openThread(l.id, true); } catch(err) { toast(err.message, 'err'); } };
@@ -576,15 +577,15 @@ async function loadStudents() {
   try { STU = await A('swk_admin_leads', { p_search:$('#sq').value, p_status:$('#sStatus').value || null, p_limit:2000 }); } catch(e) { return toast(e.message, 'err'); }
   const T = $('#sTable');
   if (!STU.length) { T.innerHTML = '<tr><td><div class="empty"><b>No students</b>Nothing matches yet.</div></td></tr>'; return; }
-  T.innerHTML = `<thead><tr><th>Name</th><th>Phone</th><th>Level</th><th>Subject</th><th>Campus</th><th>Asked for</th><th>Lecture</th><th>Joining</th><th>Status</th><th>Joined</th></tr></thead>`;
+  T.innerHTML = `<thead><tr><th>Name</th><th>Phone</th><th>Level</th><th>Subject</th><th>Campus</th><th>Asked for</th><th>Lecture</th><th>Joining</th><th>Alerts</th><th>Status</th><th>Joined</th></tr></thead>`;
   const tb = document.createElement('tbody');
-  STU.forEach(l => { const r = el(`<tr class="click"><td><b>${esc(l.name)}</b>${l.unread_admin ? ` <span class="pill on" style="display:inline-grid">${l.unread_admin}</span>` : ''}</td><td class="muted">${esc(l.phone)}</td><td>${esc(l.level || '—')}</td><td>${esc(l.subject || '—')}</td><td>${esc(l.campus || '—')}</td><td>${esc(INTENT_LABEL[l.intent] || l.intent)}</td><td>${l.lecture_opened_at ? 'Opened' : '<span class="muted">—</span>'}</td><td>${esc(l.join_when || '—')}</td><td><span class="st ${l.status}">${esc(STATUS_LABEL[l.status] || l.status)}</span></td><td class="muted">${dt(l.created_at)}</td></tr>`);
+  STU.forEach(l => { const r = el(`<tr class="click"><td><b>${esc(l.name)}</b>${l.unread_admin ? ` <span class="pill on" style="display:inline-grid">${l.unread_admin}</span>` : ''}</td><td class="muted">${esc(l.phone)}</td><td>${esc(l.level || '—')}</td><td>${esc(l.subject || '—')}</td><td>${esc(l.campus || '—')}</td><td>${esc(INTENT_LABEL[l.intent] || l.intent)}</td><td>${l.lecture_opened_at ? 'Opened' : '<span class="muted">—</span>'}</td><td>${esc(l.join_when || '—')}</td><td>${l.push ? 'On' : '<span class="muted">Off</span>'}</td><td><span class="st ${l.status}">${esc(STATUS_LABEL[l.status] || l.status)}</span></td><td class="muted">${dt(l.created_at)}</td></tr>`);
     r.onclick = () => { go('inbox'); openThread(l.id); }; tb.append(r); });
   T.append(tb);
 }
 $('#csvBtn').onclick = () => {
   if (!STU.length) return toast('Nothing to export yet', 'err');
-  const cols = ['name','phone','email','level','subject','grade','campus','school','mode','intent','status','join_when','lecture_opened_at','created_at','notes'];
+  const cols = ['name','phone','email','level','subject','grade','campus','school','mode','intent','status','join_when','push','lecture_opened_at','created_at','notes'];
   const csv = [cols.join(',')].concat(STU.map(l => cols.map(c => `"${String(l[c] ?? '').replace(/"/g,'""')}"`).join(','))).join('\n');
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type:'text/csv' })); a.download = `swk-students-${new Date().toISOString().slice(0,10)}.csv`; a.click(); toast('CSV downloaded');
 };
@@ -603,7 +604,7 @@ async function loadFollow() {
     list.forEach(f => { const r = el(`<tr><td><b>${esc(f.lead_name)}</b><div class="mono" style="margin-top:3px">${esc(f.phone)}${f.level ? ' · ' + esc(f.level) : ''}</div></td>
       <td style="max-width:420px"><b style="font-size:.8rem">${esc(f.title)}</b><div class="muted" style="font-size:.78rem;margin-top:2px">${esc(f.body)}</div></td>
       <td class="muted">${new Date(f.due_at) <= now ? '<span class="st new">Due</span>' : ago(f.due_at)}</td>
-      <td class="muted">${f.delivered_at ? 'Seen ' + ago(f.delivered_at) + ' ago' : 'Not back yet · last seen ' + ago(f.last_seen_at)}</td>
+      <td class="muted">${f.pushed_at ? 'Notified ' + ago(f.pushed_at) + ' ago · ' : ''}${f.delivered_at ? 'Seen ' + ago(f.delivered_at) + ' ago' : 'Not back yet · last seen ' + ago(f.last_seen_at)}</td>
       <td><div class="row-btns" style="justify-content:flex-end"><a class="btn btn-red btn-sm" href="${wa(f.phone, f.body)}" target="_blank" rel="noopener">${I.wa}WhatsApp</a><button class="btn btn-ghost btn-sm op">Open chat</button>${!f.delivered_at ? '<button class="btn btn-ghost btn-sm cx">Cancel</button>' : ''}</div></td></tr>`);
       r.querySelector('.op').onclick = () => { go('inbox'); openThread(f.lead_id); };
       const cx = r.querySelector('.cx'); if (cx) cx.onclick = async () => { try { await A('swk_admin_cancel_followup', { p_id:f.id }); toast('Follow-up cancelled'); loadFollow(); } catch(e) { toast(e.message, 'err'); } };
@@ -615,12 +616,12 @@ async function loadFollow() {
 /* ════ REPORTS ════ */
 $('#days').onchange = () => loadReports();
 async function loadReports() {
-  let d; try { d = await A('swk_admin_dashboard', { p_days:Number($('#days').value) }); } catch(e) { return toast(e.message, 'err'); }
+  let d, ps; try { [d, ps] = await Promise.all([A('swk_admin_dashboard', { p_days:Number($('#days').value) }), A('swk_admin_push_stats').catch(() => null)]); } catch(e) { return toast(e.message, 'err'); }
   const k = d.kpi, pct = (a, b) => b ? Math.round(a / b * 100) + '%' : '—';
   $('#repSince').textContent = 'Since ' + new Date(d.since).toLocaleDateString([], { day:'numeric', month:'long', year:'numeric' }) + ' · Pakistan time';
   const K = [['New students', k.leads_period, `${k.leads_today} today · ${k.leads_total} all time`, true], ['Lectures opened', k.watched, pct(k.watched, k.leads_period) + ' of new students'],
     ['Want to join', k.interested, 'Picked a start date or asked for a call', true], ['Enrolled', k.enrolled, pct(k.enrolled, k.leads_period) + ' of new students'],
-    ['Chats opened', k.chats_opened, 'Visitors who opened the assistant'], ['Unread messages', k.unread, 'Waiting in your inbox', k.unread > 0],
+    ps ? ['Notifications on', ps.students_on, `${pct(ps.students_on, ps.students)} of students · ${ps.sent_followups + ps.sent_replies} sent`, true] : ['Chats opened', k.chats_opened, 'Visitors who opened the assistant'], ['Unread messages', k.unread, 'Waiting in your inbox', k.unread > 0],
     ['Follow-up replies', k.fu_replied, `${pct(k.fu_replied, k.fu_delivered)} of ${k.fu_delivered} seen`], ['Follow-ups due', k.fu_due_now, `${k.fu_pending} scheduled in total`]];
   $('#kpis').innerHTML = K.map(([t, v, s, hot]) => `<div class="kpi ${hot ? 'hot' : ''}"><div class="mono">${t}</div><div class="v">${v}</div><div class="d">${esc(s)}</div></div>`).join('');
   chart(d.by_day);

@@ -1,0 +1,14 @@
+{
+  "name": "SWK Assistant · Sir Waqas Khan",
+  "short_name": "SWK",
+  "description": "Free demo lecture, admissions and a direct line to Sir Waqas Khan.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#070708",
+  "theme_color": "#070708",
+  "icons": [
+    { "src": "swk-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "swk-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
