@@ -244,6 +244,57 @@ label.f>span{font-family:var(--mono);font-size:.58rem;letter-spacing:.16em;text-
 .modal .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:6px}
 
 .mob-nav{display:none}
+
+/* ═══ motion buttons (S. M. Builders / Xahid Anwar style): rolling label, arrow through a disc, colour flood ═══ */
+@property --ang{syntax:'<angle>';inherits:false;initial-value:0deg}
+@keyframes orbit{to{--ang:360deg}}
+:root{--ease-o:cubic-bezier(.16,1,.3,1);--metal:linear-gradient(180deg,#fbfbfc 0%,#dfe2e7 50%,#c3c8d0 100%)}
+.btn.btn-x{--h:50px;--disc:var(--metal);--disc-fg:#0b0b0d;--spin-c:#0b0b0d;height:var(--h);min-height:0;padding:0 6px 0 20px;gap:14px;justify-content:space-between;position:relative;isolation:isolate;overflow:hidden;white-space:nowrap;
+  transition:transform .35s var(--ease-o),box-shadow .6s var(--ease-o),color .6s var(--ease-o)}
+.btn.btn-x:hover,.btn.btn-x:focus-visible{transform:translateY(-2px);color:var(--disc-fg)}
+.btn.btn-x:active{transform:scale(.975)}
+.btn-sm.btn-x{--h:36px;padding-left:13px;gap:10px}
+.btn-l{position:relative;z-index:2;display:grid;overflow:hidden;height:1.3em;line-height:1.3em}
+.btn-l>span{grid-area:1/1;transition:transform .6s var(--ease-o)}
+.btn-l>span+span{transform:translateY(105%)}
+.btn-x:hover .btn-l>span:first-child,.btn-x:focus-visible .btn-l>span:first-child{transform:translateY(-105%)}
+.btn-x:hover .btn-l>span+span,.btn-x:focus-visible .btn-l>span+span{transform:none}
+.btn-i{position:relative;z-index:2;width:calc(var(--h) - 12px);height:calc(var(--h) - 12px);border-radius:10px;display:grid;place-items:center;flex:none;overflow:hidden;color:var(--disc-fg)}
+.btn-sm .btn-i{border-radius:7px}
+.btn-i::before{content:"";position:absolute;inset:0;border-radius:inherit;background:var(--disc);z-index:-1;transition:opacity .4s;box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
+.btn-x:hover .btn-i::before,.btn-x:focus-visible .btn-i::before{opacity:0}
+.btn-i svg{width:16px!important;height:16px!important;transition:transform .6s var(--ease-o),opacity .2s}
+.btn-sm .btn-i svg{width:13px!important;height:13px!important}
+.btn-i svg+svg{position:absolute;transform:translateX(-170%)}
+.btn-x:hover .btn-i svg:first-of-type,.btn-x:focus-visible .btn-i svg:first-of-type{transform:translateX(170%)}
+.btn-x:hover .btn-i svg+svg,.btn-x:focus-visible .btn-i svg+svg{transform:none}
+.btn-i .spin{position:absolute;border-color:rgba(0,0,0,.18);border-top-color:var(--spin-c)}
+.btn-x.loading .btn-i svg{opacity:0}
+.btn-fill{position:absolute;z-index:1;right:6px;top:50%;width:calc(var(--h) - 12px);height:calc(var(--h) - 12px);margin-top:calc((var(--h) - 12px) / -2);border-radius:10px;background:var(--disc);
+  transition:width .6s var(--ease-o),right .6s var(--ease-o),height .6s var(--ease-o),margin .6s var(--ease-o),border-radius .6s var(--ease-o)}
+.btn-x:hover .btn-fill,.btn-x:focus-visible .btn-fill{width:calc(100% + 2px);right:-1px;height:calc(var(--h) + 2px);margin-top:calc((var(--h) + 2px) / -2);border-radius:inherit}
+/* red: silver disc, floods to brushed silver */
+.btn-red.btn-x{--disc:var(--metal);--disc-fg:#0b0b0d}
+.btn-red.btn-x:hover{box-shadow:0 18px 36px -16px var(--red-glow),0 0 0 1px rgba(229,50,45,.6)}
+.btn-red.btn-x::after{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.38) 50%,transparent 65%);background-size:260% 100%;background-position:160% 0;transform:none;transition:none;animation:btnSheen 4.8s ease-in-out infinite}
+.btn-red.btn-x:hover::after{animation:none;opacity:0}
+@keyframes btnSheen{0%,62%{background-position:160% 0}88%,100%{background-position:-60% 0}}
+/* glass / ghost: red disc, floods red, orbiting red-silver border */
+.btn-ghost.btn-x{--disc:var(--red-grad);--disc-fg:#fff;--spin-c:#fff}
+.btn-ghost.btn-x .btn-i .spin{border-color:rgba(255,255,255,.3)}
+.btn-ghost.btn-x::after{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1.5px;z-index:3;pointer-events:none;opacity:0;transition:opacity .6s var(--ease-o);
+  background:conic-gradient(from var(--ang,0deg),transparent 0 66%,var(--red-2) 80%,#fff 87%,transparent 95%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.btn-ghost.btn-x:hover::after{opacity:1;animation:orbit 2.4s linear infinite}
+/* silver: red disc, floods red */
+.btn-silver.btn-x{--disc:var(--red-grad);--disc-fg:#fff;--spin-c:#fff}
+@media (hover:none){.btn-x:active .btn-fill{width:calc(100% + 2px);right:-1px;height:calc(var(--h) + 2px);margin-top:calc((var(--h) + 2px) / -2);border-radius:inherit}.btn-x:active{color:var(--disc-fg)}}
+@media (prefers-reduced-motion:reduce){.btn-fill,.btn-l>span,.btn-i svg{transition:none!important}}
+
+.btn.btn-x{--h:42px}
+.btn-sm.btn-x{--h:34px}
+.lg-card .btn.btn-x{--h:50px}
+.btn-red.btn-x::after{border-radius:inherit}
 @media (max-width:1180px){.inbox{grid-template-columns:300px 1fr}.side{display:none}.inbox.details .side{display:block;position:fixed;right:0;top:0;bottom:0;width:min(340px,92vw);z-index:40;background:#0c0c0e;box-shadow:-30px 0 60px #000}}
 @media (max-width:900px){.kpis{grid-template-columns:1fr 1fr}.grid2,.grid3{grid-template-columns:1fr}}
 @media (max-width:760px){
@@ -517,7 +568,7 @@ async function openThread(id, silent) {
     M.append(el(`<div class="m ${m.sender}">${lab ? `<span class="lab">${esc(lab)}</span>` : ''}<div class="b">${esc(m.body)}</div><span class="t">${dt(m.at)}</span></div>`));
   });
   T.append(M);
-  const R = el(`<form class="reply"><div class="quick"></div><div class="rbar"><textarea rows="1" placeholder="Reply to ${esc(l.name.split(' ')[0])}… (shows in their chat)"></textarea><button class="btn btn-red" type="submit" style="height:40px"><span class="spin"></span>${I.send}<span>Send</span></button></div></form>`);
+  const R = el(`<form class="reply"><div class="quick"></div><div class="rbar"><textarea rows="1" placeholder="Reply to ${esc(l.name.split(' ')[0])}… (shows in their chat)"></textarea><button class="btn btn-red" type="submit"><span class="spin"></span>${I.send}<span>Send</span></button></div></form>`);
   QUICK.forEach(q => { const b = el(`<button type="button">${esc(q.length > 38 ? q.slice(0, 36) + '…' : q)}</button>`); b.onclick = () => { const ta = R.querySelector('textarea'); ta.value = q; ta.focus(); grow(ta); }; R.querySelector('.quick').append(b); });
   const ta = R.querySelector('textarea'); ta.value = keep;
   const grow = t => { t.style.height = 'auto'; t.style.height = Math.min(140, t.scrollHeight) + 'px'; };
@@ -705,6 +756,24 @@ function confirmBox(title, text, ok, fn) {
 }
 $('#modal').onclick = e => { if (e.target.id === 'modal') e.target.classList.remove('on'); };
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { $('#modal').classList.remove('on'); $('#inbox').classList.remove('details'); } });
+
+/* ═══ motion buttons: rolling label, arrow that slides through its disc, colour flood ═══ */
+(() => {
+  const ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+  const escH = t => t.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  function enhance(b) {
+    if (b.classList.contains('btn-x') || b.hasAttribute('data-plain')) return;
+    const label = b.textContent.trim().replace(/\s+/g, ' '); if (!label) return;
+    const svg = b.querySelector('svg'), icon = svg ? svg.outerHTML : ARROW, spin = b.querySelector('.spin') ? '<span class="spin"></span>' : '';
+    b.innerHTML = `<span class="btn-l"><span>${escH(label)}</span><span aria-hidden="true">${escH(label)}</span></span><span class="btn-fill" aria-hidden="true"></span><span class="btn-i" aria-hidden="true">${icon}${icon}${spin}</span>`;
+    if (!b.getAttribute('aria-label')) b.setAttribute('aria-label', label);
+    b.classList.add('btn-x');
+  }
+  const roll = b => { if (b._r) return; b._r = 1; const t = b.textContent.trim(); if (!t) return; b.innerHTML = `<span class="btn-l"><span>${escH(t)}</span><span aria-hidden="true">${escH(t)}</span></span>`; };
+  const scan = root => { root.querySelectorAll && root.querySelectorAll('.btn').forEach(enhance); root.querySelectorAll && root.querySelectorAll('.xc-act').forEach(roll); };
+  scan(document);
+  new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => { if (n.nodeType !== 1) return; if (n.matches('.btn')) enhance(n); if (n.matches('.xc-act')) roll(n); scan(n); }))).observe(document.body, { childList:true, subtree:true });
+})();
 
 /* boot */
 buildTabs();
