@@ -1006,7 +1006,7 @@ async function sync() {
         if (document.hidden) { unseen += fresh; document.title = `(${unseen}) New message · SWK`; systemNotify(fromSir ? CONFIG.ADMIN_NAME : 'SWK Solutions', lastText); }
         else rpc('swk_mark_read', { p_token:S.token }).catch(()=>{});
       }
-    } else if (r && r.ok === false) { S.token = null; save(); }
+    } else if (r && r.ok === false) { resetChat(); }
   } catch (e) {} finally { syncing = false; }
 }
 function systemNotify(who, text) { if (PUSH.granted()) PUSH.show(who, text); }
@@ -1029,10 +1029,16 @@ body.addEventListener('scroll', () => { if (nearBottom()) $('#newpill').classLis
 
 /* ════════════════ BOOT ════════════════ */
 function setWa() { $('#waLink').href = `https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent('Assalam-o-Alaikum, ' + (S.name ? 'this is ' + S.name + '. ' : '') + 'I have a question for SWK Solutions.')}`; }
+/* the server no longer knows this chat (e.g. Sir cleared the data): start fresh on this device */
+function resetChat() {
+  Object.assign(S, { token:null, name:null, lastId:0, log:[], answered:{}, lecture:null, pending:null, profile:null, locked:false, askedNotify:false, pushOn:false }); save();
+  log.innerHTML = ''; $('#intro').innerHTML = 'Assalam-o-Alaikum! I\'m the assistant at <b>Sir Waqas Khan\'s</b> desk. Pick an option, or type your question below.'; setWa();
+}
 async function boot() {
   setWa();
   await PUSH.register();
   if (S.token && PUSH.supported() && PUSH.granted() && !sessionStorage.getItem('swk_sub')) { sessionStorage.setItem('swk_sub','1'); PUSH.subscribe().catch(()=>{}); }
+  if (S.token && S.log.length) { try { const chk = await rpc('swk_sync', { p_token:S.token, p_since:S.lastId || 0 }); if (chk && chk.ok === false) resetChat(); } catch(e) {} }
   if (S.token && !S.log.length) {
     try { const h = await rpc('swk_history', { p_token:S.token });
       if (h && h.ok) { S.lecture = h.lecture || S.lecture; S.name = h.name;
@@ -1043,7 +1049,7 @@ async function boot() {
           else if (m.meta && m.meta.lecture_id && h.lecture) S.log.push({ k:'lecture', lec:h.lecture, at:m.at });
           else S.log.push({ k:'bot', t:m.body, at:m.at }); });
         save(); }
-      else if (h && h.ok === false) { S.token = null; save(); }
+      else if (h && h.ok === false) { resetChat(); }
     } catch(e) {}
   }
   if (S.log.length) {
